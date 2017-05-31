@@ -8,21 +8,34 @@ class PostsController < ApplicationController
 
     @posts = Post.none
     if params[:search]
-      query = params[:search].strip()
+      query = params[:search].strip
       query_array = query.split(' ')
 
-      query_array.each do |s|
-        @posts += Post.where("title LIKE ? OR content LIKE ?", "%#{s}%","%#{s}%")
+      if params[:option] == "Title"
+        query_array.each do |s|
+          @posts += Post.where("title LIKE ?","%#{s}%")
+        end
+      elsif params[:option] == "Content"
+        query_array.each do |s|
+          @posts += Post.where("content LIKE ?", "%#{s}%")
+        end
+      elsif params[:option] == "ALL"
+        query_array.each do |s|
+          @posts += Post.where("title LIKE ? OR content LIKE ?", "%#{s}%","%#{s}%")
+        end
       end
 
       @posts = @posts.uniq
 
+      if @posts.empty?
+        flash[:notice]="no result"
+      end
     else
-      @posts= Post.all
+      @posts=Post.all
     end
-
-
   end
+
+
 
   # GET /posts/1
   # GET /posts/1.json
